@@ -16,7 +16,7 @@
 # Set this to somewhere where you want to put your data, or where someone 
 # else has already put it.  You'll want to change this if you're not on
 # the Xiaomi's grid.
-data=/home/storage07/zhangjunbo/data
+data=/home/user/Documents/pengguin/kaldi/egs/librispeech/s5/data/
 
 # Base url for downloads.
 data_url=www.openslr.org/resources/101
@@ -37,9 +37,9 @@ set -e
 
 # Check librispeech's models
 librispeech_eg=../../librispeech/s5
-model=$librispeech_eg/exp/nnet3_cleaned/tdnn_sp
+model=$librispeech_eg/exp/chain_cleaned/tdnn_1d_sp
 ivector_extractor=$librispeech_eg/exp/nnet3_cleaned/extractor
-lang=$librispeech_eg/data/lang
+lang=$librispeech_eg/data/lang_test_tgsmall
 
 for d in $model $ivector_extractor $lang; do
   [ ! -d $d ] && echo "$0: no such path $d" && exit 1;
