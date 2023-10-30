@@ -11,6 +11,7 @@ import seaborn as sns
 from collections import Counter
 from sklearn.manifold import TSNE
 from utils import load_human_scores, load_phone_symbol_table
+import numpy as np
 
 
 def get_args():
@@ -65,6 +66,7 @@ def main():
     # Draw scatters
     label_counter = Counter(lables)
     colors = sns.color_palette("colorblind", len(label_counter))
+    features = np.array(features)
     features = TSNE(n_components=2).fit_transform(features)
     sns_plot = sns.scatterplot(x=features[:, 0], y=features[:, 1], hue=lables,
                                legend='full', palette=colors)
