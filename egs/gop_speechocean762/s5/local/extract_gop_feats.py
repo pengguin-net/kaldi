@@ -33,6 +33,8 @@ def main(args, set):
         args.feature_scp = 'exp/gop_train/feat.scp'
     elif set == 'test':
         args.feature_scp = 'exp/gop_test/feat.scp'
+    elif set == "infer":
+        args.feature_scp = 'exp/gop_infer/feat.scp'
     else:
         raise ValueError('set must be train or test')
 
@@ -42,22 +44,27 @@ def main(args, set):
     # Human expert scores
     score_of, phone_of = load_human_scores(args.human_scoring_json, floor=args.floor)
 
+    for key, mat in kaldi_io.read_mat_scp("exp/gop_infer/gop.scp"):
+        print(key, mat)
+
     # Gather the features
     lables = []
     keys = []
     features = []
     cnt = 0
+    phone_int2sym_rev = {v: k for k, v in phone_int2sym.items()}
     for key, feat in kaldi_io.read_vec_flt_scp(args.feature_scp):
         cnt += 1
         if key not in score_of:
             print(f'Warning: no human score for {key}')
-            continue
         ph = int(feat[0])
         if ph in range(args.min_phone_idx, args.max_phone_idx + 1):
-            if phone_int2sym is not None and ph in phone_int2sym:
-                ph = phone_int2sym[ph]
+            if phone_int2sym_rev is not None and ph in phone_int2sym_rev:
+                ph = phone_int2sym_rev[ph]
             keys.append(key)
             features.append(feat)
+            # for training
+            #lables.append([ph, score_of[key]])
             lables.append([ph])
 
     print('now processing {:s} set with floor {:f}, load {:d} samples'.format(set, args.floor, cnt))
@@ -73,11 +80,18 @@ def main(args, set):
         np.savetxt('gopt_feats/tr_feats.csv', features, delimiter=',')
         np.savetxt('gopt_feats/tr_keys_phn.csv', keys, delimiter=',', fmt='%s')
         np.savetxt('gopt_feats/tr_labels_phn.csv', lables, delimiter=',', fmt='%s')
+    elif set == 'infer':
+        np.savetxt('gopt_feats/in_feats.csv', features, delimiter=',')
+        np.savetxt('gopt_feats/in_keys_phn.csv', keys, delimiter=',', fmt='%s')
+        np.savetxt('gopt_feats/in_labels_phn.csv', lables, delimiter=',', fmt='%s')
 
 if __name__ == '__main__':
     args = get_args()
     args.floor = 0.1
-    main(args, 'train')
-
-    args.floor = 0.1
-    main(args, 'test')
+    main(
+        args,'infer'
+    )
+    # main(args, 'train')
+    #
+    # args.floor = 0.1
+    # main(args, 'test')
